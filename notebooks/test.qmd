@@ -1,0 +1,129 @@
+---
+title: "Local Public Procurement: Data Building"
+author: Denise Gutiérrez
+df-print: paged
+---
+
+## Country: Chile
+
+# General data features
+
+- **Structure**
+The data of Chile is divided in two bodies of data: one for *tenders* and another for *purchase orders*, which I called **purchases** for simplicity.
+
+- **Temporal dimension**
+We have data from 2007 until 2024. (We decided to stop in 2024 because we want to cover complete years and the year in which the stuy is being done is 2025). So, our study covers 18 years. 
+
+- **Description**
+The raw data comes by month, so we have 12 files for each year. If we multiply 12 *(number of months)* * 18 *(number of years in the analysis)*, we end up with 216 files. 
+But these are 216 files just for the tenders files. We also have the purchase files by the same amount, so we have 432 files in total. This is: 
+
+- **Tenders files** : 216 files from 2007 to 2024.
+- **Purchases files** : 216 files from 2007 to 2024.
+
+This raw data was fully downloaded on 25.02.2025. 
+
+As of 19.03.24, we are still working in the data building. 
+
+
+# Tenders
+
+
+
+### Number of variables in the raw table
+
+The **raw table is** a consolidated dataset that merges all 216 tenders files covering the 18 years of data.
+
+Each **tenders file** contains 107 variables. 
+
+As of 16.07.25, the raw table contains **109 variables.**
+
+The additional two variables are:
+
+1. Nombre producto genrico: this is a typo, so at the end it is not an additional variable. I fixed that problem while creating the final tables. I explain that later in the section *structure of tenders table.*
+
+2. Filename: it was a variable created by us to track where the files come from. This was not taken into account in any table. 
+
+3. In the notion table, we have 110 variables because I added te variable office_id in the buyers table (however, this variable is just in the buyers table and not in the raw data).
+
+### Consistency of variables in the raw data over 18 years
+
+I checked the files of 2007 and 2024 to check if the variables were the same over the years. This is what I found: 
+
+1. The variable **Sector** appears in 2024, but it does not appear in 2007. It was added at some point in time, but I do not know when. This was checked on 27.03.25: this variable started to appear in the year 2012 for only three entries (looking at the variable "fecha de creación"). 
+
+2. The variable **UnidadMedida.1** appears in 2007, but no longer appears in 2024. It was deleted at some point in time, but I do not know when. This was checked on 27.03.25: this variable appeared until the year 2014 (looking at the variable "fecha de creación").
+
+3. The variable **Estado final Oferta** appears in 2007, but no longer appears in 2024. It was deleted at some point in time, but I do not know when. This was checked on 27.03.25: this variable appeared until the year 2014 (looking at the variable "fecha de creación").
+
+4. The variable **Codigo Estado Licitacion** seems to have the same entry as the variable **CodigoEstado**. I need to $\textcolor{blue}{CHECK}$ this.
+
+### Problems while creating the raw table 
+
+1. The files 2014-3 and 2014-4 were not taken into account because they do not open (it seems they have an error). 
+
+2. The other files in 2014 were taken into account. However, some of them have missing colums in relation to the rest of the files in the other years. In spite of this, we took the 2014 files into the final table (with "unionbyname=true").
+
+3. The file 2017-8 was not taken into account because it has an error. 
+
+4. We realized that the value "codigounidad" is not te lowest level of identification for a buyer because one unit can be located in differents communes, so we had to combine the information of the unit code with the commune to have another variable called "office", so in that way we have the lowest level of identification. \
+
+- Talking to Claudia Soto, she explained to us that it is a mistake in the data and that in fact each unit should be just in one commune. So, the office variable does not mae sense now (11.06.25). Instead, we need to check the units and what is the correct commune where they belong to. 
+
+5. However, out of the 92,482,928 entries in the data, 2,272,884 do not have information of communes. We also have information of the address, but only for 118.060 values out of the total 2,272,884 missing. It gives us the chance to recover 5.2 % of the information, but it seems not to be worthwhile. 
+
+### Segmentation of the raw table into organized tables
+
+The raw table was divided into structured tables for tenders, buyers, items, bids, and suppliers. In this context, the suppliers are actually bidders, but we refer to them as suppliers for consistency, as this allows us to later match them with the purchase data.
+
+#### Tenders table
+
+In this table, we have 63 variables. 
+
+For more information, see our database in DuckDB or the [Notion raw table description](https://www.notion.so/dictionary-database-Chile-tenders-1dd9a6c5478f80c38522e1c26a35d8af).
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** tender_id | id of the tender in the system | 4,060,881 |
+| tender_link      | link containing all the information about the call (criteria, etc) important for strategic pp    | 4,060,686 |
+| tender_type_description      |   private or public and amount range  | 13 possible outcomes |
+| tender_status      | status of the tender. e.g.,  awarded, suspended, etc.   | 6 possible outcomes |
+| **5.** tender_type      | id of the type of tender    | 14 possible outcomes |
+| is_open_or_closed_call      | open or closed call    | 1 = open; 0 = closed |
+| tender_currency_id      | id of the currency    | 6 possible outcomes |
+| is_it_construction      | construction tenders    | 0 = no; 2 = yes  |
+| complaints_count      | number of complaints    | --- |
+| **10.** creation_date      | tender creation date    | --- |
+| number_of_bidders     | number of bidders   | --- |
+
+
+
+
+
+#### Buyers table
+
+#### Items table
+
+#### Bids table
+
+#### Suppliers (bidders) table
+
+# Purchases
+
+### Number of variables in the raw table
+
+The **raw table is** a consolidated dataset that merges all 216 tenders files covering the 18 years of data.
+
+Each **purchases file** contains 79 variables. I checked the files of 2007 and 2024 to check if the variables were the same over the years. This is what I found: 
+
+1. The variable **IdPlanDeCompra** appears in 2007, but not in 2024. It was deleted at some point in time, but I do not know when. I need to $\textcolor{blue}{CHECK}$ this.
+
+2. The variable **Codigo_ConvenioMarco** appears in 2024, but it does not appear in 2007. It was added at some point in time, but I do not know when. I need to $\textcolor{blue}{CHECK}$ this.
+
+
+
+
+
+

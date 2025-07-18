@@ -159,3 +159,43 @@ INSERT INTO purchases
 
   -----------------------------------------------------------------------------------------
 
+create table direct_procurement as select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2018_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2019_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2020_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2021_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2022_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2023_0.xlsx');
+insert into direct_procurement select * from read_xlsx('data/raw/peru/direct_procurement/CONOSCE_ADJUDICACIONES_CD2024_0.xlsx');
+--------------------------------------------------------------------------------------------------------------------
+create table pac as select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2018_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2019_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2020_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2021_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2022_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2023_0.xlsx');
+insert into pac select * from read_xlsx('data/raw/peru/pac/CONOSCE_PAC2024_0.xlsx');
+--------------------------------------------------------------------------------------------------------------------
+create table nulo as select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2018_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2019_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2020_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2021_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2022_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2023_0.xlsx');
+insert into nulo select * from read_xlsx('data/raw/peru/nulo/CONOSCE_NULOS2024_0.xlsx');
+--------------------------------------------------------------------------------------------------------------------
+create table desert as select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2018_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2019_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2020_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2021_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2022_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2023_0.xlsx');
+insert into desert select * from read_xlsx('data/raw/peru/desert/CONOSCE_DESIERTOS2024_0.xlsx');
+--------------------------------------------------------------------------------------------------------------------
+create table arbitration as select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2018_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2019_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2020_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2021_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2022_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2023_0.xlsx');
+insert into arbitration select * from read_xlsx('data/raw/peru/arbitration/CONOSCE_ARBITRAJE2024_0.xlsx');
+--------------------------------------------------------------------------------------------------------------------

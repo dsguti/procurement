@@ -1,6 +1,10 @@
 [deps]
+AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 DBInterface = "a10d1c49-ce27-4219-8d33-6db1a4562965"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataFramesMeta = "1313f7d8-7da2-5740-9ea0-a2ca25f37964"
 DuckDB = "d2f5444f-75bc-4fdf-ac35-56f514c445e1"
+QuackIO = "7b8617ff-c43a-4c37-a28b-ad5a1791f8ae"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"

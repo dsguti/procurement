@@ -58,7 +58,7 @@ create table bids as select
     montounitariooferta as bid_unit_price,
     valor_total_ofertado as bid_total_price,
     cantidadadjudicada as awarded_items_quantity,
-    montolineaadjudica as acquisition_line_description,
+    montolineaadjudica as awarded_total_price,
     fechaenviooferta as bid_submission_date,
     estado_final_oferta as bid_final_status,
     oferta_seleccionada as is_bid_awarded,
