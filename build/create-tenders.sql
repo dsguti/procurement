@@ -1,7 +1,7 @@
-create table raw as select * 
+create or replace table raw as select * 
 from read_csv('data/intermediate/tenders/lic_*.csv', nullstr='NA', decimal_separator=',', union_by_name=true, ignore_errors=true, normalize_names=true, filename=true);
 
-create table suppliers as select 
+create or replace table suppliers as select 
     distinct on (codigosucursalproveedor, codigoproveedor)
     codigosucursalproveedor as supplier_branch_id,
     codigoproveedor as supplier_id,
@@ -11,8 +11,7 @@ create table suppliers as select
     descripcionproveedor as supplier_description,
 from raw order by supplier_branch_id;
 
-CREATE TABLE buyers AS 
-SELECT 
+create or replace table buyers AS SELECT 
     ROW_NUMBER() OVER (ORDER BY codigounidad, comunaunidad) AS office_id,  
     codigounidad AS buyer_unit_id,          
     comunaunidad AS buyer_unit_commune,     
@@ -27,9 +26,10 @@ FROM raw
 GROUP BY codigounidad, comunaunidad
 ORDER BY office_id, codigounidad, comunaunidad;
 
-create table item as select 
+create or replace table item as select 
     distinct on (codigoitem)
     codigoitem as item_id,
+    codigo as tender_id,
     correlativo as item_sequential_number,
     codigoproductoonu as item_unspsc_id,
     rubro1 as item_category_1,
@@ -44,7 +44,7 @@ create table item as select
     unidadmedida1 as item_secondary_unit_measure,
 from raw order by item_id;
 
-create table bids as select 
+create or replace table bids as select 
     distinct on (codigo, codigoitem, codigosucursalproveedor)
     codigo as tender_id,
     codigoitem as item_id,
@@ -64,14 +64,15 @@ create table bids as select
     oferta_seleccionada as is_bid_awarded,
 from raw order by codigo, codigoitem, supplier_branch_id;
 
-create table tenders as select 
+create or replace table tenders as select 
     distinct on (codigo)
     codigo as tender_id,
+    codigounidad as buyer_unit_id,
     link as tender_link,
     codigoexterno as tender_external_id,
     nombre as tender_name,
     descripcion as tender_description,
-    tipodeadquisicion as tender_type_description,
+    tipo_de_adquisicion as tender_type_description,
     codigoestado as tender_id_status,
     estado as tender_status,
     informada as is_tender_informed,
@@ -79,13 +80,13 @@ create table tenders as select
     tipo as tender_type,
     tipoconvocatoria as is_open_or_closed_call,
     codigomoneda as tender_currency_id,
-    monedaadquisicion as tender_currency_name,
+    moneda_adquisicion as tender_currency_name,
     etapas as tender_stages,
     estadoetapas as status_stages,
     tomarazon as is_tender_with_compt_approv,
     estadocs as contract_signing_status,
     contrato as contract_mode,
-    obras as is_it_construction,
+    obras as is_construction,
     cantidadreclamos as complaints_count,
     fechacreacion as creation_date,
     fechacierre as closing_date,
@@ -128,7 +129,7 @@ create table tenders as select
     fechaaprobacion as contract_adjudication_date,
     numerooferentes as number_of_bidders,
     codigoestadolicitacion as tender_id_status_2,
-    montoestimadoadjudicado as awarded_estimated_amount,
+    monto_estimado_adjudicado as awarded_estimated_amount,
 from raw order by codigo;
 
 alter table item rename column product_generic_name to product_generic_name_2;

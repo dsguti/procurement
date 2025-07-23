@@ -58,7 +58,6 @@ convert-encoding-purchases:
 database-init-tenders:
     duckdb data/processed/tenders.duckdb < build/create-tenders.sql
 
-
 database-init-purchases:
     duckdb data/processed/purchases.duckdb < build/create-purchases.sql
 

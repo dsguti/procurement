@@ -1,10 +1,31 @@
 ---
 title: "Local Public Procurement: Data Building"
 author: Denise Gutiérrez
-df-print: paged
+format:
+  html:
+    self-contained: true
+    toc: true
+    number-sections: true
 ---
 
-## Country: Chile
+```{r, include = FALSE}
+
+library(rmarkdown)
+
+purchases <- DBI::dbConnect(
+    drv = duckdb::duckdb(),
+    dbdir = "../data/processed/purchases.duckdb",
+    read_only = TRUE
+)
+
+tenders <- DBI::dbConnect(
+    drv = duckdb::duckdb(),
+    dbdir = "../data/processed/tenders.duckdb",
+    read_only = TRUE
+)
+```
+
+
 
 # General data features
 
@@ -28,9 +49,7 @@ As of 19.03.24, we are still working in the data building.
 
 # Tenders
 
-
-
-### Number of variables in the raw table
+## Number of variables in the raw table
 
 The **raw table is** a consolidated dataset that merges all 216 tenders files covering the 18 years of data.
 
@@ -46,7 +65,7 @@ The additional two variables are:
 
 3. In the notion table, we have 110 variables because I added te variable office_id in the buyers table (however, this variable is just in the buyers table and not in the raw data).
 
-### Consistency of variables in the raw data over 18 years
+## Consistency of variables in the raw data over 18 years
 
 I checked the files of 2007 and 2024 to check if the variables were the same over the years. This is what I found: 
 
@@ -58,7 +77,7 @@ I checked the files of 2007 and 2024 to check if the variables were the same ove
 
 4. The variable **Codigo Estado Licitacion** seems to have the same entry as the variable **CodigoEstado**. I need to $\textcolor{blue}{CHECK}$ this.
 
-### Problems while creating the raw table 
+## Problems while creating the raw table 
 
 1. The files 2014-3 and 2014-4 were not taken into account because they do not open (it seems they have an error). 
 
@@ -72,13 +91,30 @@ I checked the files of 2007 and 2024 to check if the variables were the same ove
 
 5. However, out of the 92,482,928 entries in the data, 2,272,884 do not have information of communes. We also have information of the address, but only for 118.060 values out of the total 2,272,884 missing. It gives us the chance to recover 5.2 % of the information, but it seems not to be worthwhile. 
 
-### Segmentation of the raw table into organized tables
+## Segmentation of the raw table into organized tables
 
 The raw table was divided into structured tables for tenders, buyers, items, bids, and suppliers. In this context, the suppliers are actually bidders, but we refer to them as suppliers for consistency, as this allows us to later match them with the purchase data.
 
-#### Tenders table
+### Tenders table
 
-In this table, we have 63 variables. 
+In this table, we have **63** variables:
+
+```{sql}
+#| label: column-names
+#| connection: tenders
+#| output.var: tenders_df
+#| include: false
+
+SELECT * exclude(tender_link) from tenders limit 20;
+```
+
+```{r}
+#| echo: false
+rmarkdown::paged_table(tenders_df)
+```
+
+
+The table above excluded the variable *tender link*.\
 
 For more information, see our database in DuckDB or the [Notion raw table description](https://www.notion.so/dictionary-database-Chile-tenders-1dd9a6c5478f80c38522e1c26a35d8af).
 
@@ -88,42 +124,228 @@ These are the most important variables or the ones that can help us in the analy
 |-----------|------------------|------------------|
 | **1.** tender_id | id of the tender in the system | 4,060,881 |
 | tender_link      | link containing all the information about the call (criteria, etc) important for strategic pp    | 4,060,686 |
-| tender_type_description      |   private or public and amount range  | 13 possible outcomes |
-| tender_status      | status of the tender. e.g.,  awarded, suspended, etc.   | 6 possible outcomes |
-| **5.** tender_type      | id of the type of tender    | 14 possible outcomes |
+| tender_type_description      |   private or public and amount range  | 13  |
+| tender_status      | status of the tender. e.g.,  awarded, suspended, etc.   | 6  |
+| **5.** tender_type      | id of the type of tender    | 14  |
 | is_open_or_closed_call      | open or closed call    | 1 = open; 0 = closed |
-| tender_currency_id      | id of the currency    | 6 possible outcomes |
+| tender_currency_id      | id of the currency    | 6  |
 | is_it_construction      | construction tenders    | 0 = no; 2 = yes  |
 | complaints_count      | number of complaints    | --- |
 | **10.** creation_date      | tender creation date    | --- |
+| estimated_amount      | tender estimated amount    | --- |
 | number_of_bidders     | number of bidders   | --- |
 
 
+### Buyers table
+
+In this table, we have **10** variables.
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** buyer_unit_id | id of the lowest-level procuring entity | 6,926  |
+| buyer_unit_commune      | commune where the procuring unit is located    | 349  |
+| buyer_organization_id      | id of the procuring organization  | 1,103  |
+| buyer_organization_name      | name of the procuring organization   | 1,780  |
+| **5.** buyer_sector      | sector of the procuring organization     | 9  |
+| buyer_unit_rut      | rut of the lowest-level procuring entity    | 2,301  |
+| buyer_unit_name      |  name of the lowest-level procuring entity  | 6,093  |
+| buyer_unit_region      | region where the procuring unit is located    | --- |
+
+### Items table
+
+In this table, we have **12** variables.
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** item_id | id of the item in the system | 19,615,949  |
+| item_unspsc_id      | the classification code for a product or service based on the United Nations Standard Products and Services Code system    | 16,902  |
+| item_category_1      | broad category of the product or service | 59  |
+| item_category_2      | category of the product or service  | 359  |
+| **5.** item_category_3      | specific category of the product or service    | 2,069  |
+| item_quantity      | number of items in the tender    | --- |
+| item_unit_of_measure      |  unit of measure of the item (kg, paquete, milimetro)  | --- |
+| product_generic_name      | generic name of the product or service    | 16,160  |
+
+### Bids table
+
+In this table, we have **16** variables.
+
+We included the variables *tender_id*, *item_id*, and *supplier_branch_id* from tenders, items, ans suppliers respectively because the bids do not have their own identifier. 
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** tender_id |id of the tender in the system |4,060,881 |
+| item_id      | id of the item in the system   | 19,615,949 |
+| supplier_branch_id      | id of the bidder branch "supplier branch" | 355,959 |
+| bid_status      | accepted or rejected  | --- |
+| **5.** bid_offered_items_quantity      | number of items offered    | --- |
+| bid_currency     | currency of the bid    | --- |
+| bid_unit_price      |  price for unit  | --- |
+| bid_total_price      | total price of the bid    | --- |
+| awarded_items_quantity      | number of items awarded   | --- |
+| **10.** awarded_total_price     | total amount    | --- |
+| bid_final_status      | win or lose   | --- |
+| is_bid_awarded      | no, yes, lose (?)    | --- |
 
 
+### Suppliers (bidders) table
 
-#### Buyers table
+In this table, we have **8** variables.
 
-#### Items table
+THERE IS NO GEOGRAPHICAL INFORMATION OF THE BIDDERS IN THE TENDERS DATABASE.
+However, with the supplier_branch_id, supplier_id, and supplier_rut we can have that information in the purchases database.
 
-#### Bids table
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
 
-#### Suppliers (bidders) table
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** supplier_branch_id |id of the bidder branch "supplier branch" |355,959 |
+| supplier_id| id of the bidder "supplier"  | 351,174 |
+| supplier_rut      | rut of the bidder | 351,279  |
+| supplier_name      | name of the bidder  | 315,907 |
+
 
 # Purchases
 
-### Number of variables in the raw table
+## Number of variables in the raw table
 
 The **raw table is** a consolidated dataset that merges all 216 tenders files covering the 18 years of data.
 
-Each **purchases file** contains 79 variables. I checked the files of 2007 and 2024 to check if the variables were the same over the years. This is what I found: 
+Each **purchases file** contains 79 variables. 
+
+As of 21.07.25, the raw table contains **82 variables.**
+
+The additional three variables are:
+
+1. region: the original purchases file does not contain clean data for regions. This colum is an attempt to have regions in a clean way. 
+
+2. comuna: the original purchases file does not contain clean data for communes. This colum is an attempt to have communes in a clean way.\
+
+**For the conference in the US, I cleaned the original entry in "comunas", so this one (which also have some issues) is not needed.**
+
+3. montotaloc_usd: the original purchases file does not have the amounts in dollar. This colum is an attempt to have the amounts in dollars. 
+
+4. In the notion table, we have 83 variables because I added te variable office_id in the buyers table (however, this variable is just in the buyers table and not in the raw data).
+
+## Consistency of variables in the raw data over 18 years
+
+I checked the files of 2007 and 2024 to check if the variables were the same over the years. This is what I found: 
 
 1. The variable **IdPlanDeCompra** appears in 2007, but not in 2024. It was deleted at some point in time, but I do not know when. I need to $\textcolor{blue}{CHECK}$ this.
 
 2. The variable **Codigo_ConvenioMarco** appears in 2024, but it does not appear in 2007. It was added at some point in time, but I do not know when. I need to $\textcolor{blue}{CHECK}$ this.
 
+## Problems while creating the raw table 
 
+1. We did not have any issue creating the raw table.  
 
+## Segmentation of the raw table into organized tables
+
+The raw table was divided into structured tables for purchases, buyers, items, and suppliers. 
+
+### Purchases table
+
+In this table, we have **41** variables:
+
+```{sql}
+#| label: column1-names
+#| connection: purchases
+#| output.var: purchases_df
+#| include: false
+
+SELECT * exclude(purchase_link) from purchases limit 20;
+```
+
+```{r}
+#| echo: false
+rmarkdown::paged_table(purchases_df)
+```
+The table above excluded the variable *purchase link*.\
+
+For more information, see our database in DuckDB or the [Notion raw table description](https://www.notion.so/dictionary-database-Chile-purchases-1dd9a6c5478f80a0a15bda87c9b37eb8).
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** purchase_id | id of the purchase in the system | 35,025,782 |
+| purchase_link      | link containing all the information about the purchase    | 34,401,196 |
+| purchase_source      | source of the purchase (explore because it seems the same as description but it has 39 possible outcomes)  | 39  |
+| is_direct_procurement      | direct prourement   | no, si, null  |
+| **5.** is_agile_procurement      | agile procurement    | no, si  |
+| purchase_type_description      | procurement type    | 18 |
+| purchase_status      | status of the purchase (accepted, in process, etc)    | 5  |
+| purchase_creation_date      | creation date of the purchase   | ---  |
+| is_a_purchase_with_items      | ---    | 1 (?), 0(?)|
+| **10.**  purchase_supplier_average_rating     | average rating of the purchase from the suplier    | --- |
+| supplier_evaluations_count      | number of evaluations of the purchases from the supplier    | --- |
+| purchase_total_amount     | total amount of the purchase in the original currency | --- |
+| purchase_currency_type      | currency of the purchase   | 9|
+| purchase_total_amount_clp    | total amount of the purchase in Chilean pesos   | --- |
+| **15.** purchase_net_total      | net total of the purchase    | --- |
+| purchase_country     | country of the purchase   | 5 |
+
+### Buyers table
+
+In this table, we have **10** variables.
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** buyer_unit_id | id of the lowest-level procuring entity | 8,528   |
+| buyer_unit_city      | city where the procuring unit is located    | 817 entries, but the name of the cities are clean. Although some entries contain numbers or other characters. That is why we have more than 346 distinct values. **I need to check the entry in the raw data: ciudadunidadcompra** where I made the changes |
+| buyer_unit_rut      | rut of the lowest-level procuring entity    | 3,189  |
+| buyer_unit_name      |  name of the lowest-level procuring entity  | 9,175  |
+| **5.** buyer_organization_id      | id of the procuring organization  | 1,192  |
+| buyer_organization_name      | name of the procuring organization   | 1,327  |
+| buyer_sector      | sector of the procuring organization     | 9  |
+| buyer_unit_region      | region where the procuring unit is located    | 17 |
+| buyer_unit_country      | country where the procuring unit is located    | 6 |
+
+### Items table
+
+In this table, we have **14** variables.
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** item_id | id of the item in the system | 96,979,185  |
+| item_un_id      | the classification code for a product or service based on the United Nations Standard Products and Services Code system    | 18,505  |
+| item_category_1      | broad category of the product or service | 61  |
+| item_category_2      | category of the product or service  | 361  |
+| **5.** item_category_3      | specific category of the product or service    | 2,088  |
+| item_quantity      | number of items in the tender    | --- |
+| item_unit_of_measure      |  unit of measure of the item (kg, paquete, milimetro)  | --- |
+| item_currency      | currency of the item    | 7  |
+| item_net_price      |  net price of the item  | --- |
+| **10.** acquired_items_net_total      | net total of all the items acquired    | ---  |
+
+### Suppliers table
+
+In this table, we have **9** variables.
+
+These are the most important variables or the ones that can help us in the analysis at this stage (18.07.25):
+
+| Variable  | Description      | Number of values |
+|-----------|------------------|------------------|
+| **1.** supplier_branch_id |id of the supplier branch |420,850 |
+| supplier_id| id of the supplier  | 412,464 |
+| supplier_branch_rut | rut of the supplier branch | 427,379  |
+| supplier_branch_name      | name of the supplier branch  | 364,513 |
+| **5.** supplier_name |name of the supplier |385,659 |
+| supplier_commune| commune where the supplier is located  | 696 entries. **I need to check the entry in the raw data: comunaproveedor** where I made the changes |
+| supplier_region | region where the supplier is located | 309 **I need to check the original data in the raw table** |
+| supplier_country      | country where the supplier is located  | 72 |
+
+**I need to check again all the geographical data in these tables and the amounts of money.**
 
 
 
